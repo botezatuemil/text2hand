@@ -12,7 +12,6 @@ class get_characters():
         upper = np.array([179, 255, 255])
         mask = cv2.inRange(imgHSV, lower, upper)
         imgResult = cv2.bitwise_and(img, img, mask=mask)
-        #cv2.imshow("RESULT", imgResult)
         cv2.imwrite("C:\\Emil\\Proiecte\\Python\\Proiecte_Python\\Automation\\Text2Hand\\Resources\\alphaGrid.png", imgResult)
         return imgResult
         
@@ -23,7 +22,6 @@ class get_characters():
         # threshold input image as mask
         mask = cv2.threshold(gray, 120, 255, cv2.THRESH_BINARY)[1]
         mask = 255 - mask
-        #cv2.imshow("MASK", mask)
         # kernel = np.ones((3,3), np.uint8)
         # mask = cv2.morphologyEx(mask, cv2.MORPH_OPEN, kernel)
         # mask = cv2.morphologyEx(mask, cv2.MORPH_CLOSE, kernel)
@@ -41,28 +39,6 @@ class get_characters():
         cv2.imwrite("C:\\Emil\\Proiecte\\Python\\Proiecte_Python\\Automation\\Text2Hand\\Resources\\alpha.png", result)
         return result
 
-        
-
-    def getContours(self, imgCanny, img, imgAlpha):
-
-        contours, hierarchy = cv2.findContours(imgCanny, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-        x, y, w, h = 0, 0, 0, 0
-        count = 97
-
-        for cnt in contours:
-            area = cv2.contourArea(cnt)
-            if area > 1:
-                peri = cv2.arcLength(cnt, True)
-                approx = cv2.approxPolyDP(cnt, 0.01*peri, True)
-                x, y, w, h = cv2.boundingRect(approx)
-                cv2.drawContours(img, cnt, -1, (0, 255, 0), 1)
-                imgCropped = imgAlpha[y - 2 : y + h + 2, x - 2 : x + w + 2]
-
-                #cv2.imwrite("C:\\Emil\\Proiecte\\Python\\Proiecte_Python\\Automation\\Text2Hand\\Resources\\a"+ str(count) + ".png", imgCropped)
-                count += 1
-           
-        cv2.imshow("COUNTOURS", img)
-
 
     def get_boxes(self, img, imgAlpha):
 
@@ -76,7 +52,6 @@ class get_characters():
         for c in cnts:
             area = cv2.contourArea(c)
             if area < 5000:
-                #cv2.drawContours(img, [c], -1, (0, 255, 0), 1)
                 cv2.drawContours(thresh, [c], -1, (0,0,0), -1)
 
        
@@ -120,23 +95,18 @@ class get_characters():
                 result[mask==0] = 255
                 result = cv2.cvtColor(result, cv2.COLOR_BGR2GRAY)
                 result = cv2.adaptiveThreshold(result,255,cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY_INV,5,5)
-
-                cv2.imshow("dskhfkds", result)
                 
                 cntours, hierarchy = cv2.findContours(result, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
                 #cv2.imwrite("C:\\Emil\\Proiecte\\Python\\Proiecte_Python\\Automation\\Text2Hand\\Resources\\b"+ str(countsquare) + ".png", result)
-                #cntours = cntours[0] if len(cnts) == 2 else cntours[1]
-              
+                
                 x, y, w, h = 0, 0, 0, 0
                 countsquare += 1
-              
                 biggest = 0
             
                 for cnt in cntours:
                     area = cv2.contourArea(cnt)
                     if area < 3000 and area >= biggest and area > 10:
                         biggest = area
-                        #print(biggest)
                         myCnt = cnt
                         
             
@@ -149,13 +119,8 @@ class get_characters():
                 cv2.imwrite("C:\\Emil\\Proiecte\\Python\\Proiecte_Python\\Automation\\Text2Hand\\Resources\\a"+ str(count) + ".png", imgCropped)
                 count += 1
 
-                
-                #cv2.imshow('result', result)
                 cv2.waitKey(175)
-        
-        cv2.imshow("IMAGE", img) 
-
-
+    
 
 class get_file_handwrite():
 
