@@ -2,20 +2,12 @@ from cv2 import cv2
 import numpy as np
 from PIL import Image, ImageDraw, ImageFilter
 from imutils import contours
+import random
 
 
 class get_characters():
 
-    # def threshold_image(self, img):
-    #     imgHSV = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
-    #     lower = np.array([162, 15, 88])
-    #     upper = np.array([179, 255, 255])
-    #     mask = cv2.inRange(imgHSV, lower, upper)
-    #     imgResult = cv2.bitwise_and(img, img, mask=mask)
-    #     cv2.imwrite("C:\\Emil\\Proiecte\\Python\\Proiecte_Python\\Automation\\Text2Hand\\Resources\\alphaGrid.png", imgResult)
-    #     return imgResult
-        
-
+    
     def get_transparent_alphachannel(self, img):
         gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
 
@@ -115,7 +107,10 @@ class get_characters():
                 x, y, w, h = cv2.boundingRect(approx)
                 cv2.drawContours(img, [myCnt], -1, (0, 255, 0), 1)
                 imgCropped = imgAlpha[y - 2 : y + h + 2, x - 2 : x + w + 2]
-                        
+
+                if count == 123:
+                    count = 48
+
                 cv2.imwrite("C:\\Emil\\Proiecte\\Python\\Proiecte_Python\\Automation\\Text2Hand\\Resources\\a"+ str(count) + ".png", imgCropped)
                 count += 1
 
@@ -125,37 +120,59 @@ class get_characters():
 class get_file_handwrite():
 
     def write_on_txt(self):
-        gap, ht = 30, 30
+        gap, ht = 30, 50
         txt = open("C:\\Emil\\Proiecte\\Python\\Proiecte_Python\\Automation\\Text2Hand\\dummy.txt")
-        BG=Image.open("C:\\Emil\\Proiecte\\Python\\Proiecte_Python\\Automation\\Text2Hand\\background.png") 
+        BG=Image.open("C:\\Emil\\Proiecte\\Python\\Proiecte_Python\\Automation\\Text2Hand\\background1.png") 
 
         backup = BG.copy()
         
-        for i in txt.read().replace("\n", ""):   
+        for i in txt.read().replace("\n", ""):  
             try:
                 cases = Image.open("C:\\Emil\\Proiecte\\Python\\Proiecte_Python\\Automation\\Text2Hand\\Resources\\a" + str(ord(i)) + ".png")
             except:
                 print("error")
 
-            backup.paste(cases, (gap, ht), cases)
-            gap += cases.width
-            if gap > BG.width:
-                ht += 50
+            if ord(i) == ord('b') or ord(i) == ord('d') or ord(i) == ord('f') or ord(i) == ord('h') or ord(i) == ord('k') or ord(i) == ord('l') or ord(i) == ord('t'):
+                backup.paste(cases, (gap-8, ht-10), cases) 
+            else:
+                backup.paste(cases, (gap-8, ht), cases)
+
+            gap += cases.width + random.randint(-2, -1)
+
+            pos = 0
+            if ord(i) == ord(' '):
+                j = i + 1
+                
+                for j in txt.read().replace("\n", ""):
+                    print(j)
+                    cases = Image.open("C:\\Emil\\Proiecte\\Python\\Proiecte_Python\\Automation\\Text2Hand\\Resources\\a" + str(ord(j)) + ".png")
+                    if (ord(j) != ord(' ')):
+                        pos += cases.width + random.randint(-2, -1)
+                    else: 
+                        break
+
+
+            if gap + pos > BG.width:
+                ht += 60 + random.randint(8, 15)
                 gap = 0
             
+
         backup.save('C:\\Emil\\Proiecte\\Python\\Proiecte_Python\\Automation\\Text2Hand\\new.png')
         
               
 
 if __name__ == "__main__":
 
-    img = cv2.imread("C:\\Emil\\Proiecte\\Python\\Proiecte_Python\\Automation\\Text2Hand\\alphabet17.png")
+    img = cv2.imread("C:\\Emil\\Proiecte\\Python\\Proiecte_Python\\Automation\\Text2Hand\\alphabet19.png")
+    
     #img = cv2.resize(img, (892, 267)) 
-    #img = cv2.resize(img, (850, 1169)) 
+    #img = cv2.resize(img, (850, 1169))
 
+    x, y, w, h = 150, 195, 1354, 460 
+    img = img[y:y+h, x:x+w]
 
-    imgAlpha = get_characters().get_transparent_alphachannel(img)
-    get_characters().get_boxes(img, imgAlpha)
+    #imgAlpha = get_characters().get_transparent_alphachannel(img)
+    #get_characters().get_boxes(img, imgAlpha)
     get_file_handwrite().write_on_txt()
 
     cv2.waitKey(0)
