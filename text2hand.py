@@ -6,21 +6,21 @@ from imutils import contours
 
 class get_characters():
 
-    def threshold_image(self, img):
-        imgHSV = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
-        lower = np.array([162, 15, 88])
-        upper = np.array([179, 255, 255])
-        mask = cv2.inRange(imgHSV, lower, upper)
-        imgResult = cv2.bitwise_and(img, img, mask=mask)
-        cv2.imwrite("C:\\Emil\\Proiecte\\Python\\Proiecte_Python\\Automation\\Text2Hand\\Resources\\alphaGrid.png", imgResult)
-        return imgResult
+    # def threshold_image(self, img):
+    #     imgHSV = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
+    #     lower = np.array([162, 15, 88])
+    #     upper = np.array([179, 255, 255])
+    #     mask = cv2.inRange(imgHSV, lower, upper)
+    #     imgResult = cv2.bitwise_and(img, img, mask=mask)
+    #     cv2.imwrite("C:\\Emil\\Proiecte\\Python\\Proiecte_Python\\Automation\\Text2Hand\\Resources\\alphaGrid.png", imgResult)
+    #     return imgResult
         
 
     def get_transparent_alphachannel(self, img):
         gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
 
         # threshold input image as mask
-        mask = cv2.threshold(gray, 120, 255, cv2.THRESH_BINARY)[1]
+        mask = cv2.threshold(gray, 200, 255, cv2.THRESH_BINARY)[1]
         mask = 255 - mask
         # kernel = np.ones((3,3), np.uint8)
         # mask = cv2.morphologyEx(mask, cv2.MORPH_OPEN, kernel)
@@ -63,7 +63,7 @@ class get_characters():
         thresh = cv2.morphologyEx(thresh, cv2.MORPH_CLOSE, horizontal_kernel, iterations=6)
         
         
-        #cv2.imshow("thresh",thresh)
+        cv2.imshow("thresh",thresh)
         # Sort by top to bottom and each row by left to right
         invert = 255 - thresh
         cnts = cv2.findContours(invert, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
@@ -95,7 +95,7 @@ class get_characters():
                 result[mask==0] = 255
                 result = cv2.cvtColor(result, cv2.COLOR_BGR2GRAY)
                 result = cv2.adaptiveThreshold(result,255,cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY_INV,5,5)
-                
+                #cv2.imshow("result", result)
                 cntours, hierarchy = cv2.findContours(result, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
                 #cv2.imwrite("C:\\Emil\\Proiecte\\Python\\Proiecte_Python\\Automation\\Text2Hand\\Resources\\b"+ str(countsquare) + ".png", result)
                 
@@ -149,9 +149,10 @@ class get_file_handwrite():
 
 if __name__ == "__main__":
 
-    img = cv2.imread("C:\\Emil\\Proiecte\\Python\\Proiecte_Python\\Automation\\Text2Hand\\alphabet13.png")
+    img = cv2.imread("C:\\Emil\\Proiecte\\Python\\Proiecte_Python\\Automation\\Text2Hand\\alphabet17.png")
     #img = cv2.resize(img, (892, 267)) 
-    #img = cv2.resize(img, (857, 267)) 
+    #img = cv2.resize(img, (850, 1169)) 
+
 
     imgAlpha = get_characters().get_transparent_alphachannel(img)
     get_characters().get_boxes(img, imgAlpha)
