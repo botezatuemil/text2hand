@@ -3,6 +3,7 @@ import numpy as np
 from PIL import Image, ImageDraw, ImageFilter
 from imutils import contours
 import random
+import docx
 
 
 class get_characters():
@@ -124,31 +125,51 @@ class get_characters():
                 cv2.waitKey(175)
     
 
-class get_file_handwrite():
+class get_file_handwrite():     
 
-    def write_on_txt(self):
+    def write_on_txt(self, preference):
         gap, ht = 30, 50
         number = 0
         spaces = 0
+        fullText = []
+
+    
+        
+           
+        if preference == 1:
+            doc = docx.Document("C:\\Emil\\Proiecte\\Python\\Proiecte_Python\\Automation\\Text2Hand\\content.docx")
+            doc2 = docx.Document("C:\\Emil\\Proiecte\\Python\\Proiecte_Python\\Automation\\Text2Hand\\content2.docx")
+            
+            for para in doc.paragraphs:
+                fullText.append(para.text)
+            fullText = '\n'.join(fullText)
+
+            with open('C:\\Emil\\Proiecte\\Python\\Proiecte_Python\\Automation\\Text2Hand\\dummy.txt', 'w') as f:
+                for item in fullText:
+                    f.write("%s" % item)
+
+            with open('C:\\Emil\\Proiecte\\Python\\Proiecte_Python\\Automation\\Text2Hand\\dummy2.txt', 'w') as f:
+                for item in fullText:
+                    f.write("%s" % item)
+            
         txt = open("C:\\Emil\\Proiecte\\Python\\Proiecte_Python\\Automation\\Text2Hand\\dummy.txt")
         txt2 = open("C:\\Emil\\Proiecte\\Python\\Proiecte_Python\\Automation\\Text2Hand\\dummy2.txt")
         BG=Image.open("C:\\Emil\\Proiecte\\Python\\Proiecte_Python\\Automation\\Text2Hand\\background1.png") 
 
         backup = BG.copy()
-        content = txt2.read().replace("\n", " ")
-
+        contentTXT = txt2.read().replace("\n", " ")
+        
 
         for i in txt.read().replace("\n", " "):  
-            
             different = 0
 
             if (ord(i) != ord(' ')):
                 number += 1
             else:
                 number += 1
-                for k in range(number, len(content)):
+                for k in range(number, len(contentTXT)):
                     different += 1
-                    if ord(content[k]) == ord(' '):
+                    if ord(contentTXT[k]) == ord(' '):
                         break;
 
             if ord(i) == ord(' '):
@@ -156,14 +177,15 @@ class get_file_handwrite():
             else:
                 if spaces >= 3:
                     ht += 60 + random.randint(15, 30)
-                    gap = spaces * 30
+                    gap = spaces * 21
                 spaces = 0
 
 
             if gap + different * 30 > BG.width:
                 ht += 60 + random.randint(15, 30)
                 gap = 0
-            
+
+                
             try:
                 cases = Image.open("C:\\Emil\\Proiecte\\Python\\Proiecte_Python\\Automation\\Text2Hand\\Resources\\a" + str(ord(i)) + ".png")
             except:
@@ -189,12 +211,13 @@ if __name__ == "__main__":
 
     x, y, w, h = 150, 195, 1354, 460 
     img = img[y:y+h, x:x+w]
-    
+    preference = 0 # for txt
     # x, y, w, h = 153, 198, 1357, 998 
     # img = img[y:y+h, x:x+w]
     
     #imgAlpha = get_characters().get_transparent_alphachannel(img)
     #get_characters().get_boxes(img, imgAlpha)
-    get_file_handwrite().write_on_txt()
+    get_file_handwrite().write_on_txt(preference)
+    
 
     cv2.waitKey(0)
