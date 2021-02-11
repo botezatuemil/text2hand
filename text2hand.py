@@ -97,7 +97,7 @@ class get_characters():
             
                 for cnt in cntours:
                     area = cv2.contourArea(cnt)
-                    if area < 3000 and area >= biggest and area > 10:
+                    if area < 5000 and area >= biggest and area > 50:
                         biggest = area
                         myCnt = cnt
                         
@@ -108,8 +108,15 @@ class get_characters():
                 cv2.drawContours(img, [myCnt], -1, (0, 255, 0), 1)
                 imgCropped = imgAlpha[y - 2 : y + h + 2, x - 2 : x + w + 2]
 
+
+                if count == 91:
+                    count = 97
+
                 if count == 123:
                     count = 48
+
+                if count == 58:
+                    count = 125
 
                 cv2.imwrite("C:\\Emil\\Proiecte\\Python\\Proiecte_Python\\Automation\\Text2Hand\\Resources\\a"+ str(count) + ".png", imgCropped)
                 count += 1
@@ -121,12 +128,38 @@ class get_file_handwrite():
 
     def write_on_txt(self):
         gap, ht = 30, 50
+        number = 0
         txt = open("C:\\Emil\\Proiecte\\Python\\Proiecte_Python\\Automation\\Text2Hand\\dummy.txt")
+        txt2 = open("C:\\Emil\\Proiecte\\Python\\Proiecte_Python\\Automation\\Text2Hand\\dummy2.txt")
         BG=Image.open("C:\\Emil\\Proiecte\\Python\\Proiecte_Python\\Automation\\Text2Hand\\background1.png") 
 
         backup = BG.copy()
-        
-        for i in txt.read().replace("\n", ""):  
+        content = txt2.read().replace("\n", " ")
+
+
+        for i in txt.read().replace("\n", " "):  
+            
+            different = 0
+
+            if (ord(i) != ord(' ')):
+                number += 1
+            else:
+                number += 1
+                print(number)
+                for k in range(number, len(content)):
+                    #print(content[k])
+                    different += 1
+                    if ord(content[k]) == ord(' '):
+                        break;
+
+                
+
+            
+
+            if gap + different * 30 > BG.width:
+                ht += 60 + random.randint(15, 30)
+                gap = 0
+            
             try:
                 cases = Image.open("C:\\Emil\\Proiecte\\Python\\Proiecte_Python\\Automation\\Text2Hand\\Resources\\a" + str(ord(i)) + ".png")
             except:
@@ -138,24 +171,6 @@ class get_file_handwrite():
                 backup.paste(cases, (gap-8, ht), cases)
 
             gap += cases.width + random.randint(-2, -1)
-
-            pos = 0
-            if ord(i) == ord(' '):
-                j = i + 1
-                
-                for j in txt.read().replace("\n", ""):
-                    print(j)
-                    cases = Image.open("C:\\Emil\\Proiecte\\Python\\Proiecte_Python\\Automation\\Text2Hand\\Resources\\a" + str(ord(j)) + ".png")
-                    if (ord(j) != ord(' ')):
-                        pos += cases.width + random.randint(-2, -1)
-                    else: 
-                        break
-
-
-            if gap + pos > BG.width:
-                ht += 60 + random.randint(8, 15)
-                gap = 0
-            
 
         backup.save('C:\\Emil\\Proiecte\\Python\\Proiecte_Python\\Automation\\Text2Hand\\new.png')
         
@@ -170,7 +185,10 @@ if __name__ == "__main__":
 
     x, y, w, h = 150, 195, 1354, 460 
     img = img[y:y+h, x:x+w]
-
+    
+    # x, y, w, h = 153, 198, 1357, 998 
+    # img = img[y:y+h, x:x+w]
+    
     #imgAlpha = get_characters().get_transparent_alphachannel(img)
     #get_characters().get_boxes(img, imgAlpha)
     get_file_handwrite().write_on_txt()
