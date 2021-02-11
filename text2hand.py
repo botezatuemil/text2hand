@@ -129,6 +129,7 @@ class get_file_handwrite():
     def write_on_txt(self):
         gap, ht = 30, 50
         number = 0
+        spaces = 0
         txt = open("C:\\Emil\\Proiecte\\Python\\Proiecte_Python\\Automation\\Text2Hand\\dummy.txt")
         txt2 = open("C:\\Emil\\Proiecte\\Python\\Proiecte_Python\\Automation\\Text2Hand\\dummy2.txt")
         BG=Image.open("C:\\Emil\\Proiecte\\Python\\Proiecte_Python\\Automation\\Text2Hand\\background1.png") 
@@ -145,16 +146,19 @@ class get_file_handwrite():
                 number += 1
             else:
                 number += 1
-                print(number)
                 for k in range(number, len(content)):
-                    #print(content[k])
                     different += 1
                     if ord(content[k]) == ord(' '):
                         break;
 
-                
+            if ord(i) == ord(' '):
+                spaces += 1
+            else:
+                if spaces >= 3:
+                    ht += 60 + random.randint(15, 30)
+                    gap = spaces * 30
+                spaces = 0
 
-            
 
             if gap + different * 30 > BG.width:
                 ht += 60 + random.randint(15, 30)
