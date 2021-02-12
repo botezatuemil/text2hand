@@ -131,6 +131,7 @@ class get_file_handwrite():
         gap, ht = 30, 50
         number = 0
         spaces = 0
+        tab = 0
         fullText = []
 
     
@@ -138,7 +139,7 @@ class get_file_handwrite():
            
         if preference == 1:
             doc = docx.Document("C:\\Emil\\Proiecte\\Python\\Proiecte_Python\\Automation\\Text2Hand\\content.docx")
-            doc2 = docx.Document("C:\\Emil\\Proiecte\\Python\\Proiecte_Python\\Automation\\Text2Hand\\content2.docx")
+            #doc2 = docx.Document("C:\\Emil\\Proiecte\\Python\\Proiecte_Python\\Automation\\Text2Hand\\content2.docx")
             
             for para in doc.paragraphs:
                 fullText.append(para.text)
@@ -181,13 +182,21 @@ class get_file_handwrite():
                 spaces = 0
 
 
+            if ord(i) == 9:
+                tab += 1
+            else:
+                if tab >= 1:
+                    ht += 60 + random.randint(15, 30)
+                    gap = tab * 90
+                tab = 0
+
             if gap + different * 30 > BG.width:
                 ht += 60 + random.randint(15, 30)
                 gap = 0
 
                 
             try:
-                cases = Image.open("C:\\Emil\\Proiecte\\Python\\Proiecte_Python\\Automation\\Text2Hand\\Resources\\a" + str(ord(i)) + ".png")
+                cases = Image.open("C:\\Emil\\Proiecte\\Python\\Proiecte_Python\\Automation\\Text2Hand\\Resources\\a" + str(ord(i)) + ".png").convert('RGBA')
             except:
                 print("error")
 
@@ -211,7 +220,7 @@ if __name__ == "__main__":
 
     x, y, w, h = 150, 195, 1354, 460 
     img = img[y:y+h, x:x+w]
-    preference = 0 # for txt
+    preference = 1 # for txt
     # x, y, w, h = 153, 198, 1357, 998 
     # img = img[y:y+h, x:x+w]
     
