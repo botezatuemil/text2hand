@@ -7,28 +7,18 @@ import docx
 
 
 class get_characters():
-
-    
+  
     def get_transparent_alphachannel(self, img):
         gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
 
-        # threshold input image as mask
+        # threshold input image as mask and invert the mask
         mask = cv2.threshold(gray, 200, 255, cv2.THRESH_BINARY)[1]
         mask = 255 - mask
-        # kernel = np.ones((3,3), np.uint8)
-        # mask = cv2.morphologyEx(mask, cv2.MORPH_OPEN, kernel)
-        # mask = cv2.morphologyEx(mask, cv2.MORPH_CLOSE, kernel)
-        
-        #mask = cv2.GaussianBlur(mask, (0,0), sigmaX=2, sigmaY=2, borderType = cv2.BORDER_DEFAULT)
-        
-        #mask = (2*(mask.astype(np.float32))-255.0).clip(0,255).astype(np.uint8)
 
         result = img.copy()
         result = cv2.cvtColor(result, cv2.COLOR_BGR2BGRA)
 
-        result[:, :, 3] = mask
-        # cv2.imshow("RESULT", result)
-        # result = cv2.resize(result, (21, 21)) 
+        result[:, :, 3] = mask 
         cv2.imwrite("C:\\Emil\\Proiecte\\Python\\Proiecte_Python\\Automation\\Text2Hand\\Resources\\alpha.png", result)
         return result
 
@@ -47,8 +37,7 @@ class get_characters():
             if area < 5000:
                 cv2.drawContours(thresh, [c], -1, (0,0,0), -1)
 
-       
-       
+
         # Fix horizontal and vertical lines
         vertical_kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (1,5))
         thresh = cv2.morphologyEx(thresh, cv2.MORPH_CLOSE, vertical_kernel, iterations=9)
@@ -56,7 +45,6 @@ class get_characters():
         thresh = cv2.morphologyEx(thresh, cv2.MORPH_CLOSE, horizontal_kernel, iterations=6)
         
         
-        cv2.imshow("thresh",thresh)
         # Sort by top to bottom and each row by left to right
         invert = 255 - thresh
         cnts = cv2.findContours(invert, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
@@ -88,34 +76,35 @@ class get_characters():
                 result[mask==0] = 255
                 result = cv2.cvtColor(result, cv2.COLOR_BGR2GRAY)
                 result = cv2.adaptiveThreshold(result,255,cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY_INV,5,5)
-                #cv2.imshow("result", result)
                 cntours, hierarchy = cv2.findContours(result, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
-                #cv2.imwrite("C:\\Emil\\Proiecte\\Python\\Proiecte_Python\\Automation\\Text2Hand\\Resources\\b"+ str(countsquare) + ".png", result)
                 
                 x, y, w, h = 0, 0, 0, 0
                 countsquare += 1
                 biggest = 0
-            
+
+                #get the biggest contour to avoid false detection
                 for cnt in cntours:
                     area = cv2.contourArea(cnt)
                     if area < 5000 and area >= biggest and area > 50:
                         biggest = area
                         myCnt = cnt
                         
-            
+                # get the coordinates of the upper and lower corner of the letter and crop the letters
                 peri = cv2.arcLength(myCnt, True)
                 approx = cv2.approxPolyDP(myCnt, 0.01*peri, True)
                 x, y, w, h = cv2.boundingRect(approx)
-                cv2.drawContours(img, [myCnt], -1, (0, 255, 0), 1)
+                #cv2.drawContours(img, [myCnt], -1, (0, 255, 0), 1)
                 imgCropped = imgAlpha[y - 2 : y + h + 2, x - 2 : x + w + 2]
 
-
+                # take the uppercase
                 if count == 91:
                     count = 97
 
+                # take the digits
                 if count == 123:
                     count = 48
 
+                # take the symbol need to fix this
                 if count == 58:
                     count = 125
 
@@ -134,25 +123,26 @@ class get_file_handwrite():
         tab = 0
         fullText = []
 
-    
-        
-           
+        # if the user use docx document
         if preference == 1:
             doc = docx.Document("C:\\Emil\\Proiecte\\Python\\Proiecte_Python\\Automation\\Text2Hand\\content.docx")
-            #doc2 = docx.Document("C:\\Emil\\Proiecte\\Python\\Proiecte_Python\\Automation\\Text2Hand\\content2.docx")
             
+            # save the content in variable
             for para in doc.paragraphs:
                 fullText.append(para.text)
             fullText = '\n'.join(fullText)
 
+            # overwrite the txt
             with open('C:\\Emil\\Proiecte\\Python\\Proiecte_Python\\Automation\\Text2Hand\\dummy.txt', 'w') as f:
                 for item in fullText:
                     f.write("%s" % item)
 
+            # overwrite the txt
             with open('C:\\Emil\\Proiecte\\Python\\Proiecte_Python\\Automation\\Text2Hand\\dummy2.txt', 'w') as f:
                 for item in fullText:
                     f.write("%s" % item)
-            
+        
+        # open the files
         txt = open("C:\\Emil\\Proiecte\\Python\\Proiecte_Python\\Automation\\Text2Hand\\dummy.txt")
         txt2 = open("C:\\Emil\\Proiecte\\Python\\Proiecte_Python\\Automation\\Text2Hand\\dummy2.txt")
         BG=Image.open("C:\\Emil\\Proiecte\\Python\\Proiecte_Python\\Automation\\Text2Hand\\background1.png") 
@@ -164,6 +154,8 @@ class get_file_handwrite():
         for i in txt.read().replace("\n", " "):  
             different = 0
 
+            # count how many letters it follows (the next word) and calcute the dimension of it to know 
+            # if we need to get a new line to avoid the wrong speration of it
             if (ord(i) != ord(' ')):
                 number += 1
             else:
@@ -173,6 +165,7 @@ class get_file_handwrite():
                     if ord(contentTXT[k]) == ord(' '):
                         break;
 
+            # for TXT if we have more than 3 spaces that means a new line with indentation
             if ord(i) == ord(' '):
                 spaces += 1
             else:
@@ -181,7 +174,7 @@ class get_file_handwrite():
                     gap = spaces * 21
                 spaces = 0
 
-
+            # for DOCX if we have at least a tab that means a new line with indentation
             if ord(i) == 9:
                 tab += 1
             else:
@@ -190,27 +183,29 @@ class get_file_handwrite():
                     gap = tab * 90
                 tab = 0
 
+            # check for a new line
             if gap + different * 30 > BG.width:
                 ht += 60 + random.randint(15, 30)
                 gap = 0
 
-                
+            # open the letters with the ascii code of the letter that we read from the file
             try:
                 cases = Image.open("C:\\Emil\\Proiecte\\Python\\Proiecte_Python\\Automation\\Text2Hand\\Resources\\a" + str(ord(i)) + ".png").convert('RGBA')
             except:
                 print("error")
 
+            # special cases to move the biggest letter up and the lowers letter down
             if ord(i) == ord('b') or ord(i) == ord('d') or ord(i) == ord('f') or ord(i) == ord('h') or ord(i) == ord('k') or ord(i) == ord('l') or ord(i) == ord('t'):
                 backup.paste(cases, (gap-8, ht-10), cases) 
             else:
                 backup.paste(cases, (gap-8, ht), cases)
 
+            # a new gap for every letter with random case
             gap += cases.width + random.randint(-2, -1)
 
         backup.save('C:\\Emil\\Proiecte\\Python\\Proiecte_Python\\Automation\\Text2Hand\\new.png')
         
-              
-
+            
 if __name__ == "__main__":
 
     img = cv2.imread("C:\\Emil\\Proiecte\\Python\\Proiecte_Python\\Automation\\Text2Hand\\alphabet19.png")
@@ -218,9 +213,12 @@ if __name__ == "__main__":
     #img = cv2.resize(img, (892, 267)) 
     #img = cv2.resize(img, (850, 1169))
 
+    # crop the file and save only the table
     x, y, w, h = 150, 195, 1354, 460 
     img = img[y:y+h, x:x+w]
-    preference = 1 # for txt
+
+    # 0 for txt and 1 for word file
+    preference = 1 
     # x, y, w, h = 153, 198, 1357, 998 
     # img = img[y:y+h, x:x+w]
     
@@ -228,5 +226,4 @@ if __name__ == "__main__":
     #get_characters().get_boxes(img, imgAlpha)
     get_file_handwrite().write_on_txt(preference)
     
-
     cv2.waitKey(0)
