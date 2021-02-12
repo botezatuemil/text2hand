@@ -44,7 +44,7 @@ class get_characters():
         horizontal_kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (5,1))
         thresh = cv2.morphologyEx(thresh, cv2.MORPH_CLOSE, horizontal_kernel, iterations=6)
         
-        
+        cv2.imshow("TRESH", thresh)
         # Sort by top to bottom and each row by left to right
         invert = 255 - thresh
         cnts = cv2.findContours(invert, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
@@ -64,7 +64,7 @@ class get_characters():
         
         # Iterate through each box
         countsquare = 97
-        count = 97
+        count = 33
         contor = 0
         
         for row in alphabet_rows:
@@ -97,21 +97,32 @@ class get_characters():
                 imgCropped = imgAlpha[y - 2 : y + h + 2, x - 2 : x + w + 2]
 
                 # take the uppercase
-                if count == 91:
-                    count = 97
+                if count == 34:
+                    count = 39
 
-                # take the digits
-                if count == 123:
+                if count == 42:
+                    count = 44
+
+                if count == 45:
+                    count = 46
+                
+                if count == 47:
                     count = 48
 
                 # take the symbol need to fix this
-                if count == 58:
-                    count = 125
+                if count == 59:
+                    count = 63
+
+                if count == 64:
+                    count = 65 
+
+                if count == 91:
+                    count = 97 
 
                 cv2.imwrite("C:\\Emil\\Proiecte\\Python\\Proiecte_Python\\Automation\\Text2Hand\\Resources\\a"+ str(count) + ".png", imgCropped)
                 count += 1
 
-                cv2.waitKey(175)
+        cv2.waitKey(175)
     
 
 class get_file_handwrite():     
@@ -121,6 +132,8 @@ class get_file_handwrite():
         number = 0
         spaces = 0
         tab = 0
+        isSpace = False
+        isTab = False
         fullText = []
 
         # if the user use docx document
@@ -156,14 +169,14 @@ class get_file_handwrite():
 
             # count how many letters it follows (the next word) and calcute the dimension of it to know 
             # if we need to get a new line to avoid the wrong speration of it
-            if (ord(i) != ord(' ')):
+            if ord(i) != ord(' '):
                 number += 1
             else:
                 number += 1
                 for k in range(number, len(contentTXT)):
                     different += 1
-                    if ord(contentTXT[k]) == ord(' '):
-                        break;
+                    if ord(contentTXT[k]) == ord(' ') or ord(contentTXT[k]) == 9:
+                        break
 
             # for TXT if we have more than 3 spaces that means a new line with indentation
             if ord(i) == ord(' '):
@@ -172,6 +185,7 @@ class get_file_handwrite():
                 if spaces >= 3:
                     ht += 60 + random.randint(15, 30)
                     gap = spaces * 21
+                    isSpace = True
                 spaces = 0
 
             # for DOCX if we have at least a tab that means a new line with indentation
@@ -181,13 +195,13 @@ class get_file_handwrite():
                 if tab >= 1:
                     ht += 60 + random.randint(15, 30)
                     gap = tab * 90
+                else:
+                    if gap + different * 30 > BG.width:
+                        ht += 60 + random.randint(15, 30)
+                        gap = 0
                 tab = 0
-
-            # check for a new line
-            if gap + different * 30 > BG.width:
-                ht += 60 + random.randint(15, 30)
-                gap = 0
-
+            
+            
             # open the letters with the ascii code of the letter that we read from the file
             try:
                 cases = Image.open("C:\\Emil\\Proiecte\\Python\\Proiecte_Python\\Automation\\Text2Hand\\Resources\\a" + str(ord(i)) + ".png").convert('RGBA')
@@ -195,11 +209,14 @@ class get_file_handwrite():
                 print("error")
 
             # special cases to move the biggest letter up and the lowers letter down
-            if ord(i) == ord('b') or ord(i) == ord('d') or ord(i) == ord('f') or ord(i) == ord('h') or ord(i) == ord('k') or ord(i) == ord('l') or ord(i) == ord('t'):
+            if ord(i) == ord('b') or ord(i) == ord('d') or ord(i) == ord('f') or ord(i) == ord('h') or ord(i) == ord('k') or ord(i) == ord('l') or ord(i) == ord('t') or ord(i) >= 65 and ord(i) <= 90 or ord(i) == 39 or ord(i) == 63:
                 backup.paste(cases, (gap-8, ht-10), cases) 
+            elif ord(i) == ord('.') or ord(i) == ord(','):
+                backup.paste(cases, (gap-8, ht+15), cases) 
             else:
                 backup.paste(cases, (gap-8, ht), cases)
 
+            
             # a new gap for every letter with random case
             gap += cases.width + random.randint(-2, -1)
 
@@ -208,14 +225,16 @@ class get_file_handwrite():
             
 if __name__ == "__main__":
 
-    img = cv2.imread("C:\\Emil\\Proiecte\\Python\\Proiecte_Python\\Automation\\Text2Hand\\alphabet19.png")
+    img = cv2.imread("C:\\Emil\\Proiecte\\Python\\Proiecte_Python\\Automation\\Text2Hand\\alphabet22.png")
     
     #img = cv2.resize(img, (892, 267)) 
     #img = cv2.resize(img, (850, 1169))
 
     # crop the file and save only the table
-    x, y, w, h = 150, 195, 1354, 460 
+    # x, y, w, h = 150, 195, 1354, 460 
+    x, y, w, h = 176, 210, 1349, 768
     img = img[y:y+h, x:x+w]
+
 
     # 0 for txt and 1 for word file
     preference = 1 
